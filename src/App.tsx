@@ -203,9 +203,27 @@ export default function FlashCardApp() {
 
   const speakEstonian = () => {
     if (speechSynthesis) {
-      const utterance = new SpeechSynthesisUtterance(currentCard.estonian)
-      utterance.lang = 'et_EE'
-      speechSynthesis.speak(utterance)
+      const msg = new SpeechSynthesisUtterance()
+      const voices = window.speechSynthesis.getVoices()
+      const voice = voices.find(voice => voice.lang === 'et_EE')
+
+      console.log(voice)
+  
+      if (voice) {
+          msg.voice = voice
+          msg.volume = 1
+          msg.rate = 1
+          msg.pitch = 1
+          msg.text = currentCard.estonian
+          msg.lang = 'et_EE'
+          speechSynthesis.speak(msg)
+          return
+      } else {
+        // TODO: find an Estonian TTS
+        msg.text = currentCard.estonian
+        msg.lang = 'et_EE'
+        speechSynthesis.speak(msg)
+      }
     }
   }
 
