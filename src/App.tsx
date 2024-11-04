@@ -205,10 +205,8 @@ export default function FlashCardApp() {
     if (speechSynthesis) {
       const msg = new SpeechSynthesisUtterance()
       const voices = window.speechSynthesis.getVoices()
-      const voice = voices.find(voice => voice.lang === 'et_EE')
+      const voice = voices.find(voice => /et/.test(voice.lang))
 
-      console.log(voice)
-  
       if (voice) {
           msg.voice = voice
           msg.volume = 1
@@ -221,7 +219,7 @@ export default function FlashCardApp() {
       } else {
         // TODO: find an Estonian TTS
         msg.text = currentCard.estonian
-        msg.lang = 'et_EE'
+        msg.lang = 'fi_FI'
         speechSynthesis.speak(msg)
       }
     }
