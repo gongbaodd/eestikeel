@@ -257,7 +257,9 @@ const flashCardCategories = {
     { "estonian": "Kus? Karaokebaaris", "english": "at the karaoke bar" },
     { "estonian": "Kuhu? Karaokebaari", "english": "to the karaoke bar" },
     { "estonian": "Kus? Loomaaias", "english": "at the zoo" },
-    { "estonian": "Kuhu? Loomaaeda", "english": "to the zoo" }
+    { "estonian": "Kuhu? Loomaaeda", "english": "to the zoo" },
+    { "estonian": "Kus? Kodus", "english": "at home" },
+    { "estonian": "Kuhu? Koju", "english": "to home" },
   ]
 }
 
