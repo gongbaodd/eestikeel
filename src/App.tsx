@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-// Sample flash card data
-const flashCards = [
+// Sample flash card data with categories
+const flashCardCategories = {
+  commutation: [
     { "estonian": "istuma", "english": "to sit" },
     { "estonian": "Ma istun", "english": "I sit" },
     { "estonian": "Sa istud", "english": "You sit" },
@@ -176,9 +178,28 @@ const flashCards = [
     { "estonian": "Te lähete", "english": "You (plural) go" },
     { "estonian": "Nad lähevad", "english": "They go" },
     { "estonian": "Lähe", "english": "Go (imperative)" }
-]
+  ],
+  basics: [
+  ],
+  numbers: [
+  ],
+}
+
+const categories = Object.keys(flashCardCategories)
+
+flashCardCategories.commutation = shuffleArray(flashCardCategories.commutation)
+
+function shuffleArray<T>(array: T[]): T[] {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1)); // Random index from 0 to i
+    [array[i], array[j]] = [array[j], array[i]];  // Swap elements
+  }
+  return array;
+}
+
 
 export default function FlashCardApp() {
+  const [currentCategory, setCurrentCategory] = useState(categories[0])
   const [currentCardIndex, setCurrentCardIndex] = useState(0)
   const [isFlipped, setIsFlipped] = useState(false)
   const [speechSynthesis, setSpeechSynthesis] = useState<SpeechSynthesis | null>(null)
@@ -187,17 +208,18 @@ export default function FlashCardApp() {
     setSpeechSynthesis(window.speechSynthesis)
   }, [])
 
-  const currentCard = flashCards[currentCardIndex]
+  const currentCards = flashCardCategories[currentCategory]
+  const currentCard = currentCards[currentCardIndex]
 
   const flipCard = () => setIsFlipped(!isFlipped)
 
   const nextCard = () => {
-    setCurrentCardIndex((prevIndex) => (prevIndex + 1) % flashCards.length)
+    setCurrentCardIndex((prevIndex) => (prevIndex + 1) % currentCards.length)
     setIsFlipped(false)
   }
 
   const prevCard = () => {
-    setCurrentCardIndex((prevIndex) => (prevIndex - 1 + flashCards.length) % flashCards.length)
+    setCurrentCardIndex((prevIndex) => (prevIndex - 1 + currentCards.length) % currentCards.length)
     setIsFlipped(false)
   }
 
@@ -208,14 +230,14 @@ export default function FlashCardApp() {
       const voice = voices.find(voice => /et/.test(voice.lang))
 
       if (voice) {
-          msg.voice = voice
-          msg.volume = 1
-          msg.rate = 1
-          msg.pitch = 1
-          msg.text = currentCard.estonian
-          msg.lang = 'et_EE'
-          speechSynthesis.speak(msg)
-          return
+        msg.voice = voice
+        msg.volume = 1
+        msg.rate = 1
+        msg.pitch = 1
+        msg.text = currentCard.estonian
+        msg.lang = 'et_EE'
+        speechSynthesis.speak(msg)
+        return
       } else {
         // TODO: find an Estonian TTS
         msg.text = currentCard.estonian
@@ -225,21 +247,40 @@ export default function FlashCardApp() {
     }
   }
 
+  const handleCategoryChange = (category: string) => {
+    setCurrentCategory(category)
+    setCurrentCardIndex(0)
+    setIsFlipped(false)
+  }
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
-      <Card className="w-80 h-48 flex items-center justify-center bg-white shadow-lg rounded-lg cursor-pointer" onClick={flipCard}>
-        <div className="text-2xl font-bold text-center">
-          {isFlipped ? currentCard.english : currentCard.estonian}
-        </div>
-      </Card>
-      <div className="mt-4 space-x-2">
-        <Button onClick={prevCard}>Previous</Button>
-        <Button onClick={nextCard}>Next</Button>
-        <Button onClick={speakEstonian}>Speak</Button>
-      </div>
-      <div className="mt-4 text-sm text-gray-600">
-        Card {currentCardIndex + 1} of {flashCards.length}
-      </div>
+      <Tabs value={currentCategory} onValueChange={handleCategoryChange} className="w-full max-w-md">
+        <TabsList className="grid w-full grid-cols-3">
+          {
+            categories.map((category) => (
+              <TabsTrigger key={category} value={category}>{category}</TabsTrigger>
+            ))
+          }
+        </TabsList>
+        {Object.keys(flashCardCategories).map((category) => (
+          <TabsContent key={category} value={category} className="mt-4">
+            <Card className="w-full h-48 flex items-center justify-center bg-white shadow-lg rounded-lg cursor-pointer" onClick={flipCard}>
+              <div className="text-2xl font-bold text-center">
+                {isFlipped ? currentCard.english : currentCard.estonian}
+              </div>
+            </Card>
+            <div className="mt-4 flex justify-between items-center">
+              <Button onClick={prevCard}>Previous</Button>
+              <Button onClick={speakEstonian}>Speak</Button>
+              <Button onClick={nextCard}>Next</Button>
+            </div>
+            <div className="mt-2 text-sm text-center text-gray-600">
+              Card {currentCardIndex + 1} of {currentCards.length}
+            </div>
+          </TabsContent>
+        ))}
+      </Tabs>
     </div>
   )
 }
